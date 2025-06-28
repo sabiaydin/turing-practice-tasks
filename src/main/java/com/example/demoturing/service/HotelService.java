@@ -30,14 +30,14 @@ public class HotelService {
     }
 
     public Hotel update(Long id, Hotel hotel) {
-        if (hotelMap.containsKey(id)) {
-            hotel.setId(id);
-            hotelMap.put(id, hotel);
-            return hotel;
+        if (!hotelMap.containsKey(id)) {
+            throw new HotelNotFound("Hotel with ID " + id + " not found");
         }
-        return null;
-
+        hotel.setId(id);
+        hotelMap.put(id, hotel);
+        return hotel;
     }
+
 
     public void deleteById(Long id) {
         if (hotelMap.remove(id) == null) {
