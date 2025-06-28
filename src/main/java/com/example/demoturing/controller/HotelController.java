@@ -2,6 +2,7 @@ package com.example.demoturing.controller;
 
 import com.example.demoturing.entity.Hotel;
 import com.example.demoturing.service.HotelService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,27 +23,19 @@ public class HotelController {
     @GetMapping("/{id}")
     public ResponseEntity<Hotel> getById(@PathVariable Long id) {
         Hotel hotel = hotelService.getById(id);
-        if (hotel != null) {
             return ResponseEntity.ok(hotel);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @PostMapping
-    public ResponseEntity<Hotel> create(@RequestBody Hotel hotel) {
+    public ResponseEntity<Hotel> create(@RequestBody @Valid Hotel hotel) {
         Hotel createdHotel = hotelService.create(hotel);
         return ResponseEntity.status(201).body(createdHotel);
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<Hotel> update(@PathVariable Long id, @RequestBody Hotel hotel) {
+    public ResponseEntity<Hotel> update(@PathVariable Long id, @RequestBody @Valid Hotel hotel) {
         Hotel updatedHotel = hotelService.update(id, hotel);
-        if (updatedHotel != null) {
-            return ResponseEntity.ok(updatedHotel);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+       return ResponseEntity.ok(updatedHotel);
     }
 
     @DeleteMapping("/{id}")

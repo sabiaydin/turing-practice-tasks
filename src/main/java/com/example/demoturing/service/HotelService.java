@@ -18,6 +18,9 @@ public class HotelService {
     }
 
     public Hotel getById(Long id) {
+        if (!hotelMap.containsKey(id)) {
+            throw new HotelNotFound("Hotel with id " + id + " does not exist.");
+        }
         return hotelMap.get(id);
     }
 
