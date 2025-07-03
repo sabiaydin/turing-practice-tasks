@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,20 +23,17 @@ public class HotelController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Hotel> getById(@PathVariable Long id) {
-        Hotel hotel = hotelService.getById(id);
-            return ResponseEntity.ok(hotel);
+            return ResponseEntity.ok(hotelService.getById(id));
     }
 
     @PostMapping
     public ResponseEntity<Hotel> create(@RequestBody @Valid Hotel hotel) {
-        Hotel createdHotel = hotelService.create(hotel);
-        return ResponseEntity.status(201).body(createdHotel);
+        return ResponseEntity.status(201).body(hotelService.create(hotel));
     }
 
     @PostMapping("/{id}")
     public ResponseEntity<Hotel> update(@PathVariable Long id, @RequestBody @Valid Hotel hotel) {
-        Hotel updatedHotel = hotelService.update(id, hotel);
-       return ResponseEntity.ok(updatedHotel);
+       return ResponseEntity.ok(hotelService.update(id, hotel));
     }
 
     @DeleteMapping("/{id}")
@@ -44,5 +42,10 @@ public class HotelController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadExcelFile(@RequestParam("file") MultipartFile file) {
+        hotelService.uploadHotelsFromExcel(file);
+        return ResponseEntity.ok("Hotels uploaded successfully.");
+    }
 
 }

@@ -16,26 +16,22 @@ public class RoomController {
 
     @GetMapping
     public ResponseEntity<List<Room>> getAllRooms() {
-        List<Room> rooms = roomService.getAll();
-        return ResponseEntity.ok(rooms);
+        return ResponseEntity.ok(roomService.getAll());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
-        Room room = roomService.getById(id);
-        return ResponseEntity.ok(room);
+        return ResponseEntity.ok(roomService.getById(id));
     }
 
     @PostMapping
     public ResponseEntity<Room> createRoom(@RequestBody Room room) {
-        Room createdRoom = roomService.create(room);
-        return ResponseEntity.status(201).body(createdRoom);
+        return ResponseEntity.status(201).body(roomService.create(room));
     }
 
     @PostMapping("/{id}")
     public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody Room room) {
-        Room updatedRoom = roomService.update(id, room);
-        return ResponseEntity.ok(updatedRoom);
+        return ResponseEntity.ok(roomService.update(id, room));
     }
 
     @DeleteMapping("/{id}")
@@ -43,4 +39,5 @@ public class RoomController {
         roomService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
 }
