@@ -49,8 +49,7 @@ public class HotelService {
     public HotelResponse create(HotelRequest request) {
         log.info("Creating hotel with name: {}", request.getName());
         Hotel hotel = mapper.toEntity(request);
-        Hotel savedHotel = repository.save(hotel);
-        return mapper.toResponse(savedHotel);
+        return mapper.toResponse(repository.save(hotel));
     }
 
     public HotelResponse update(Long id, HotelRequest request) {
@@ -61,8 +60,7 @@ public class HotelService {
         }
         Hotel hotel = mapper.toEntity(request);
         hotel.setId(id);
-        Hotel updatedHotel = repository.save(hotel);
-        return mapper.toResponse(updatedHotel);
+        return mapper.toResponse(repository.save(hotel));
     }
 
     public void deleteById(Long id) {

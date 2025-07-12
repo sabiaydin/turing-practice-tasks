@@ -6,6 +6,7 @@ public final class ErrorMessage {
     public static final String INVALID_EXCEL_DATA = "Excel faylında yalnış formatlı məlumat var.";
     public static final String FILE_PROCESSING_ERROR = "Excel faylını oxumaq mümkün olmadı.";
     public static final String INTERNAL_ERROR = "Gözlənilməz xəta baş verdi.";
+    public static final String ROOM_NOT_FOUND = "Otaq tapılmadı";
 
     private ErrorMessage() {}
 }

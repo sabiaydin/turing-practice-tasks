@@ -1,8 +1,14 @@
 package com.example.demoturing.service;
 
+import com.example.demoturing.dao.entity.Hotel;
 import com.example.demoturing.dao.entity.Room;
-import com.example.demoturing.exception.HotelNotFound;
-import com.example.demoturing.exception.RoomNotFound;
+import com.example.demoturing.dao.repository.HotelRepository;
+import com.example.demoturing.dao.repository.RoomRepository;
+import com.example.demoturing.exception.*;
+import com.example.demoturing.mapper.RoomMapper;
+import com.example.demoturing.model.request.RoomRequest;
+import com.example.demoturing.model.response.RoomResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,39 +17,55 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class RoomService {
-    private final Map<Long, Room> roomMap = new HashMap<>();
 
-    public List<Room> getAll() {
-        return new ArrayList<>(roomMap.values());
+    private final RoomRepository roomRepository;
+    private final HotelRepository hotelRepository;
+    private final RoomMapper roomMapper;
+
+    public List<RoomResponse> getRoomsByHotelId(Long hotelId) {
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND));
+
+        List<Room> rooms = roomRepository.findByHotel(hotel);
+        return roomMapper.toResponseList(rooms);
     }
 
-    public Room getById(Long id) {
-        if (!roomMap.containsKey(id)) {
-            throw new RoomNotFound("Hotel with id " + id + " does not exist.");
+    public RoomResponse createRoomForHotel(Long hotelId, RoomRequest request) {
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND));
+
+        Room room = roomMapper.toEntity(request);
+        room.setHotel(hotel);
+        Room savedRoom = roomRepository.save(room);
+        return roomMapper.toResponse(savedRoom);
+    }
+
+    public void deleteAllRoomsByHotelId(Long hotelId) {
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND));
+
+        List<Room> rooms = roomRepository.findByHotel(hotel);
+        roomRepository.deleteAll(rooms);
+    }
+
+    public RoomResponse updateRoomOfHotel(Long hotelId, Long roomId, RoomRequest request) {
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND));
+
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RoomNotFoundException(ErrorCode.ROOM_NOT_FOUND, ErrorMessage.ROOM_NOT_FOUND));
+
+        if (!room.getHotel().getId().equals(hotelId)) {
+            throw new RoomNotFoundException(ErrorCode.ROOM_NOT_FOUND, "Room does not belong to specified hotel");
         }
-        return roomMap.get(id);
+
+        room.setRoomNumber(request.getRoomNumber());
+        room.setPrice(request.getPrice());
+        room.setRoomStatus(request.getRoomStatus());
+
+        Room updatedRoom = roomRepository.save(room);
+        return roomMapper.toResponse(updatedRoom);
     }
-
-    public Room create(Room room) {
-        roomMap.put(room.getId(), room);
-        return room;
-    }
-
-    public Room update(Long id, Room room) {
-        if (!roomMap.containsKey(id)) {
-            throw new RoomNotFound("Room with ID " + id + " not found");
-        }
-        room.setId(id);
-        roomMap.put(id, room);
-        return room;
-    }
-
-
-    public void deleteById(Long id) {
-        if (roomMap.remove(id) == null) {
-            throw new HotelNotFound("Hotel with id " + id + " does not exist.");
-        }
-    }
-
 }

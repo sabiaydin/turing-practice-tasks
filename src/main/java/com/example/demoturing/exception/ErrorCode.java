@@ -6,6 +6,7 @@ public final class ErrorCode {
     public static final String INVALID_EXCEL_DATA = "ERR_INVALID_EXCEL_DATA";
     public static final String FILE_PROCESSING_ERROR = "ERR_FILE_PROCESSING";
     public static final String INTERNAL_ERROR = "ERR_INTERNAL";
+    public static final String ROOM_NOT_FOUND = "ERR_ROOM_NOT_FOUND";
 
     private ErrorCode() {}
 }
