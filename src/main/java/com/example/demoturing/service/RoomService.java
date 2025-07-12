@@ -1,8 +1,8 @@
 package com.example.demoturing.service;
 
 import com.example.demoturing.entity.Room;
-import exception.HotelNotFound;
-import exception.RoomNotFound;
+import com.example.demoturing.exception.HotelNotFound;
+import com.example.demoturing.exception.RoomNotFound;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package exception;
+package com.example.demoturing.exception;
 
 import com.example.demoturing.model.ErrorResponse;
 import org.springframework.http.HttpStatus;

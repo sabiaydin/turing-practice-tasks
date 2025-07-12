@@ -8,6 +8,7 @@ public class DemoTuringApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DemoTuringApplication.class, args);
+		System.out.println("Hello, Turing!");
 	}
 
 }

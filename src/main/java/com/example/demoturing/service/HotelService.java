@@ -1,7 +1,9 @@
 package com.example.demoturing.service;
 
 import com.example.demoturing.entity.Hotel;
-import exception.*;
+import com.example.demoturing.exception.*;
+import com.example.demoturing.repository.HotelRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -14,45 +16,39 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class HotelService {
-    private final Map<Long, Hotel> hotelMap = new HashMap<>();
-
+    private final HotelRepository repository;
     public List<Hotel> getAll() {
-        return new ArrayList<>(hotelMap.values());
+        return repository.findAll();
     }
 
     public Hotel getById(Long id) {
-        Hotel hotel = hotelMap.get(id);
-        if (hotel == null) {
-            throw new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND);
-        }
-        return hotel;
+        return repository.findById(id)
+                .orElseThrow(() ->
+                        new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND));
     }
 
     public Hotel create(Hotel hotel) {
-        hotelMap.put(hotel.getId(), hotel);
-        return hotel;
+        return repository.save(hotel);
     }
 
     public Hotel update(Long id, Hotel hotel) {
-        if (!hotelMap.containsKey(id)) {
+        if (!repository.existsById(id)) {
             throw new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND);
         }
         hotel.setId(id);
-        hotelMap.put(id, hotel);
-        return hotel;
+        return repository.save(hotel);
     }
 
     public void deleteById(Long id) {
-        if (!hotelMap.containsKey(id)) {
+        if (!repository.existsById(id)) {
             throw new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND);
         }
-        hotelMap.remove(id);
+        repository.deleteById(id);
     }
 
     public void uploadHotelsFromExcel(MultipartFile file) {
@@ -64,6 +60,8 @@ public class HotelService {
             Sheet sheet = workbook.getSheetAt(0);
             DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
+            List<Hotel> hotels = new ArrayList<>();
+
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) continue; // skip header
 
@@ -73,8 +71,10 @@ public class HotelService {
                 hotel.setLocation(row.getCell(2).getStringCellValue());
                 hotel.setCreatedAt(LocalDateTime.parse(row.getCell(3).getStringCellValue(), formatter));
 
-                hotelMap.put(hotel.getId(), hotel);
+                hotels.add(hotel);
             }
+
+            repository.saveAll(hotels);
         } catch (IOException e) {
             throw new FileProcessingException(ErrorCode.FILE_PROCESSING_ERROR, ErrorMessage.FILE_PROCESSING_ERROR);
         } catch (Exception e) {

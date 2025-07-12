@@ -1,4 +1,4 @@
-package exception;
+package com.example.demoturing.exception;
 
 public final class ErrorCode {
     public static final String HOTEL_NOT_FOUND = "ERR_HOTEL_NOT_FOUND";

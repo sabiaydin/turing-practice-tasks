@@ -1,4 +1,4 @@
-package exception;
+package com.example.demoturing.exception;
 
 public final class ErrorMessage {
     public static final String HOTEL_NOT_FOUND = "Otel tapılmadı";
