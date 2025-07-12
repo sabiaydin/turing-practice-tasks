@@ -3,6 +3,9 @@ package com.example.demoturing.service;
 import com.example.demoturing.dao.entity.Hotel;
 import com.example.demoturing.exception.*;
 import com.example.demoturing.dao.repository.HotelRepository;
+import com.example.demoturing.mapper.HotelMapper;
+import com.example.demoturing.model.request.HotelRequest;
+import com.example.demoturing.model.response.HotelResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -23,35 +26,43 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class HotelService {
-    private final HotelRepository repository;
 
-    public List<Hotel> getAll() {
+    private final HotelRepository repository;
+    private final HotelMapper mapper;
+
+    public List<HotelResponse> getAll() {
         log.info("Fetching all hotels");
-        return repository.findAll();
+        List<Hotel> hotels = repository.findAll();
+        return mapper.toResponseList(hotels);
     }
 
-    public Hotel getById(Long id) {
+    public HotelResponse getById(Long id) {
         log.info("Fetching hotel by id: {}", id);
-        return repository.findById(id)
+        Hotel hotel = repository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Hotel not found with id: {}", id);
                     return new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND);
                 });
+        return mapper.toResponse(hotel);
     }
 
-    public Hotel create(Hotel hotel) {
-        log.info("Creating hotel with name: {}", hotel.getName());
-        return repository.save(hotel);
+    public HotelResponse create(HotelRequest request) {
+        log.info("Creating hotel with name: {}", request.getName());
+        Hotel hotel = mapper.toEntity(request);
+        Hotel savedHotel = repository.save(hotel);
+        return mapper.toResponse(savedHotel);
     }
 
-    public Hotel update(Long id, Hotel hotel) {
+    public HotelResponse update(Long id, HotelRequest request) {
         log.info("Updating hotel with id: {}", id);
         if (!repository.existsById(id)) {
             log.warn("Cannot update, hotel not found with id: {}", id);
             throw new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND);
         }
+        Hotel hotel = mapper.toEntity(request);
         hotel.setId(id);
-        return repository.save(hotel);
+        Hotel updatedHotel = repository.save(hotel);
+        return mapper.toResponse(updatedHotel);
     }
 
     public void deleteById(Long id) {
@@ -77,7 +88,7 @@ public class HotelService {
             List<Hotel> hotels = new ArrayList<>();
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // skip header
+                if (row.getRowNum() == 0) continue;
 
                 Hotel hotel = new Hotel();
                 hotel.setId((long) row.getCell(0).getNumericCellValue());
@@ -87,12 +98,15 @@ public class HotelService {
 
                 hotels.add(hotel);
             }
-            log.info("Successfully uploaded {} hotels from Excel", hotels.size());
 
             repository.saveAll(hotels);
+            log.info("Successfully uploaded {} hotels from Excel", hotels.size());
+
         } catch (IOException e) {
+            log.error("File processing error", e);
             throw new FileProcessingException(ErrorCode.FILE_PROCESSING_ERROR, ErrorMessage.FILE_PROCESSING_ERROR);
         } catch (Exception e) {
+            log.error("Invalid Excel data", e);
             throw new InvalidExcelDataException(ErrorCode.INVALID_EXCEL_DATA, ErrorMessage.INVALID_EXCEL_DATA);
         }
     }
