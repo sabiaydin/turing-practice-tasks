@@ -1,6 +1,7 @@
 package com.example.demoturing.dao.entity;
 
 import com.example.demoturing.enums.RoomStatus;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -9,25 +10,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-
+@Entity
+@Table(name = "rooms")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Room {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Hotel must not be null")
+    @ManyToOne
+    @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
-
-    @NotNull(message = "Room number is required")
-    @Min(value = 1, message = "Room number must be at least 1")
     private Integer roomNumber;
-
-    @NotNull(message = "Price is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private BigDecimal price;
-
-    @NotNull(message = "Room status is required")
+    @Enumerated(EnumType.STRING)
     private RoomStatus roomStatus;
 }
