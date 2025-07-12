@@ -1,9 +1,10 @@
 package com.example.demoturing.service;
 
-import com.example.demoturing.entity.Hotel;
+import com.example.demoturing.dao.entity.Hotel;
 import com.example.demoturing.exception.*;
-import com.example.demoturing.repository.HotelRepository;
+import com.example.demoturing.dao.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -20,24 +21,33 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class HotelService {
     private final HotelRepository repository;
+
     public List<Hotel> getAll() {
+        log.info("Fetching all hotels");
         return repository.findAll();
     }
 
     public Hotel getById(Long id) {
+        log.info("Fetching hotel by id: {}", id);
         return repository.findById(id)
-                .orElseThrow(() ->
-                        new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("Hotel not found with id: {}", id);
+                    return new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND);
+                });
     }
 
     public Hotel create(Hotel hotel) {
+        log.info("Creating hotel with name: {}", hotel.getName());
         return repository.save(hotel);
     }
 
     public Hotel update(Long id, Hotel hotel) {
+        log.info("Updating hotel with id: {}", id);
         if (!repository.existsById(id)) {
+            log.warn("Cannot update, hotel not found with id: {}", id);
             throw new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND);
         }
         hotel.setId(id);
@@ -45,14 +55,18 @@ public class HotelService {
     }
 
     public void deleteById(Long id) {
+        log.info("Deleting hotel with id: {}", id);
         if (!repository.existsById(id)) {
+            log.warn("Cannot delete, hotel not found with id: {}", id);
             throw new HotelNotFoundException(ErrorCode.HOTEL_NOT_FOUND, ErrorMessage.HOTEL_NOT_FOUND);
         }
         repository.deleteById(id);
     }
 
     public void uploadHotelsFromExcel(MultipartFile file) {
+        log.info("Uploading hotels from Excel file: {}", file.getOriginalFilename());
         if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
+            log.error("Invalid file format: {}", file.getOriginalFilename());
             throw new InvalidFileFormatException(ErrorCode.INVALID_FILE_FORMAT, ErrorMessage.INVALID_FILE_FORMAT);
         }
 
@@ -73,6 +87,7 @@ public class HotelService {
 
                 hotels.add(hotel);
             }
+            log.info("Successfully uploaded {} hotels from Excel", hotels.size());
 
             repository.saveAll(hotels);
         } catch (IOException e) {

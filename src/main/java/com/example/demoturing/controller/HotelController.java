@@ -1,6 +1,6 @@
 package com.example.demoturing.controller;
 
-import com.example.demoturing.entity.Hotel;
+import com.example.demoturing.dao.entity.Hotel;
 import com.example.demoturing.service.HotelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

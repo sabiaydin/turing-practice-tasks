@@ -1,4 +1,4 @@
-package com.example.demoturing.entity;
+package com.example.demoturing.dao.entity;
 
 import com.example.demoturing.enums.RoomStatus;
 import jakarta.validation.constraints.DecimalMin;

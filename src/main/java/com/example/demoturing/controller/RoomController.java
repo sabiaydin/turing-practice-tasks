@@ -1,6 +1,6 @@
 package com.example.demoturing.controller;
 
-import com.example.demoturing.entity.Room;
+import com.example.demoturing.dao.entity.Room;
 import com.example.demoturing.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
